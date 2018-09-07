@@ -1,0 +1,18 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - pip install --upgrade pip
+      - pip install -r requirements/dev.txt
+  build:
+    commands:
+      - python setup.py bdist_wheel
+
+  post_build:
+    commands:
+      - sh release_new_version.sh
+
+cache:
+  paths:
+    - '/root/.cache/pip/**/*'

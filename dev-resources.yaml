@@ -1,0 +1,133 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Resources:
+
+  GitHubToken:
+    Type: Custom::SharedSecret
+    Properties:
+      ServiceToken:
+        Fn::ImportValue: BC-CustomResourceProvider
+      Name: /development/github/token
+
+  WheelBuild:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: BCEventsClient-Build
+      Description: Ships bc-events/master to an internal wheelhouse
+      Artifacts:
+        Type: CODEPIPELINE
+      ServiceRole:
+        Fn::ImportValue: CodeBuildRole
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/python:3.5.2
+        Type: LINUX_CONTAINER
+        EnvironmentVariables:
+          - Name: PIP_BUCKET
+            Type: PLAINTEXT
+            Value:
+              Fn::ImportValue: PipBucket
+      Cache:
+        Type: S3
+        Location:
+          Fn::Sub:
+           - ${bucketName}/bc-events-build-cache
+           - bucketName:
+               Fn::ImportValue: CodeArtifactsBucket
+      Source:
+        BuildSpec: buildspec.yaml
+        Type: CODEPIPELINE
+
+  TestBuild:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: BCEvnetsClient-Test
+      Description: Runs tests against PRs for bc-events
+      Artifacts:
+        Type: NO_ARTIFACTS
+      BadgeEnabled: true
+      Triggers:
+        Webhook: true
+      ServiceRole:
+        Fn::ImportValue: CodeBuildRole
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/python:3.5.2
+        Type: LINUX_CONTAINER
+      Cache:
+        Type: S3
+        Location:
+          Fn::Sub:
+           - ${bucketName}/bc-events-test-cache
+           - bucketName:
+               Fn::ImportValue: CodeArtifactsBucket
+      Source:
+        BuildSpec: testspec.yaml
+        Location: https://github.com/IntuitiveWebSolutions/bc-events.git
+        Type: GITHUB
+        Auth:
+          Type: OAUTH
+
+  CodePipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      Name: BCLogger-Pipeline
+      ArtifactStore:
+        Type: S3
+        Location:
+          Fn::ImportValue: CodeArtifactsBucket
+      RestartExecutionOnUpdate: true
+      RoleArn:
+        Fn::ImportValue: CodePipelineRole
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: Source
+              RunOrder: 1
+              ActionTypeId:
+                Category: Source
+                Owner: ThirdParty
+                Provider: GitHub
+                Version: 1
+              Configuration:
+                Owner: IntuitiveWebSolutions
+                Repo: bc-events
+                Branch: master
+                OAuthToken:
+                  Fn::GetAtt: [GitHubToken, Value]
+              OutputArtifacts:
+                - Name: SourceArtifact
+
+        - Name: Test
+          Actions:
+            - Name: Run-Tests
+              RunOrder: 1
+              InputArtifacts:
+                - Name: SourceArtifact
+              ActionTypeId:
+                Category: Test
+                Owner: AWS
+                Provider: CodeBuild
+                Version: 1
+              Configuration:
+                ProjectName:
+                  Ref: TestBuild
+              OutputArtifacts:
+                - Name: TestArtifact
+
+        - Name: Build
+          Actions:
+            - Name: Build-Wheel
+              RunOrder: 1
+              InputArtifacts:
+                - Name: SourceArtifact
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: 1
+              Configuration:
+                ProjectName:
+                  Ref: WheelBuild
+              OutputArtifacts:
+                - Name: BuildArtifact

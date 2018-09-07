@@ -1,0 +1,15 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - pip install --upgrade pip
+      - pip install -r requirements/test.txt
+  build:
+    commands:
+      - black . --check
+      - pytest --cache-clear
+
+cache:
+  paths:
+    - '/root/.cache/pip/**/*'
