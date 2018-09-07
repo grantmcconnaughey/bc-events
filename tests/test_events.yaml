@@ -1,0 +1,48 @@
+DefaultCategory: testing
+Topics:
+  - Action: Created
+    Entity: Test
+    Description: A new Test was created
+    Schema:
+      type: object
+      required: [id, url]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique ID of the test
+        url:
+          type: string
+          format: uri
+          description: HTTP path to fetch this test from the API
+  - Action: Deleted
+    Entity: Test
+    Description: An existing Test was deleted
+    Schema:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique ID of the test
+        name:
+          type: string
+          description: Name of the test
+  - Action: Updated
+    Entity: Test
+    Description: An existing Test was updated
+    Schema:
+      type: object
+      required: [id, status, url]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique ID of the test
+        status:
+          enum: [running, error, successful]
+        url:
+          type: string
+          format: uri
+          description: HTTP path to fetch this test from the API
