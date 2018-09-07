@@ -90,7 +90,7 @@ class EventClient(object):
 
         elif hasattr(topic_definitions, "read"):
             # Already an open file, just load it
-            loaded_definitions = yaml.load(topic_file)
+            loaded_definitions = yaml.load(topic_definitions)
 
         topics = loaded_definitions["Topics"]
 
