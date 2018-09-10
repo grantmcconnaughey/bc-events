@@ -51,4 +51,3 @@ def test_get_topic_not_found(client):
     fake_topic_name = build_topic_name(fake_category, fake_entity, fake_action)
     with pytest.raises(ValueError, match=fake_topic_name):
         client.get_topic(fake_category, fake_entity, fake_action)
-

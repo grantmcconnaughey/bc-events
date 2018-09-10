@@ -142,4 +142,3 @@ class EventSession(object):
             self._publish(topic, data)
 
         return publish_wrapper
-
