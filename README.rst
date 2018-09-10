@@ -46,7 +46,7 @@ You can do this manually, but it is slightly easier to use the convenience metho
     # Use a user_session when you have a cognito user id
     # Generally, the user id and job id will come from web request headers
     # In other contexts, they may come from sns topic attributes or some other event payload
-    user_session = event_client.user_ession(
+    user_session = event_client.user_session(
         "[COGNITO_USER_ID]",
         "[BC-JOB-ID]"
     )
@@ -60,7 +60,7 @@ Once you have a session, you can then publish events.
 
 .. code-block:: python
 
-    from .elsewhere imort user_session
+    from .elsewhere import user_session
 
     # Verbose publish call
     user_session.publish(
