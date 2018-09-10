@@ -59,7 +59,7 @@ def test_magic_call_flipped(user_session, created_test_payload):
 
 def test_magic_call_incorrect(user_session, created_test_payload):
 
-    with pytest.raises(ValueError, match="tested_create"):
+    with pytest.raises(AttributeError, match="tested_create"):
         user_session.tested_create(created_test_payload)
 
 

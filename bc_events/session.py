@@ -136,7 +136,7 @@ class EventSession(object):
             try:
                 topic = self.client.get_topic(self.client.default_category, entity, action)
             except ValueError:
-                raise ValueError("Could not resolve convenience wrapper for: " + attr_name)
+                raise AttributeError("Could not resolve convenience wrapper for: " + attr_name)
 
         def publish_wrapper(data):
             self._publish(topic, data)
