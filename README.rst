@@ -60,7 +60,7 @@ Once you have a session, you can then publish events.
 
 .. code-block:: python
 
-    from .elsewhere imort user_session
+    from .elsewhere import user_session
 
     # Verbose publish call
     user_session.publish(
