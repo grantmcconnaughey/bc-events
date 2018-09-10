@@ -71,7 +71,7 @@ Resources:
   CodePipeline:
     Type: AWS::CodePipeline::Pipeline
     Properties:
-      Name: BCLogger-Pipeline
+      Name: BCEventsClient-Pipeline
       ArtifactStore:
         Type: S3
         Location:
