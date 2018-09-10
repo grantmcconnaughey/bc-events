@@ -113,7 +113,7 @@ class EventSession(object):
 
         Raises
         ------
-        ValueError
+        AttributeError
             If we cannot parse the attr and find a corresponding topic
 
         Returns
