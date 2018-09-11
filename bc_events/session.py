@@ -1,6 +1,11 @@
+import logging
+
 from kwargs_only import kwargs_only
 
 from .event import Event
+
+
+logger = logging.getLogger("bc.events")
 
 
 class EventSession(object):
@@ -53,6 +58,11 @@ class EventSession(object):
         # TODO use a bulk api endpoint once it exists
         for event in self.events:
             event.publish()
+
+    def rollback(self):
+        """Rolls back any events in the queue for this session since the last flush."""
+        logger.warning("Rolling Back Session Events", extra={"context": {"events": self.events}})
+        self.events = []
 
     def _publish(self, topic, data):
         """Internal method for publishing data to a topic
