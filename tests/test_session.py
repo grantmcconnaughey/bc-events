@@ -74,3 +74,15 @@ def test_flush(user_session):
 
     fake_event.publish.assert_called_once()
     another_fake_event.publish.assert_called_once()
+
+
+def test_rollback(user_session):
+
+    fake_event = Mock()
+    another_fake_event = Mock()
+
+    user_session.events = [fake_event, another_fake_event]
+
+    user_session.rollback()
+
+    assert len(user_session.events) == 0
