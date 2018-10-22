@@ -55,8 +55,7 @@ class EventSession(object):
         will not send events and don't have to worry about rolling them back.
         """
 
-        event_data = [event.request_json for event in self.events]
-        self.publish_all(event_data)
+        self.publish_all(self.events)
 
     def rollback(self):
         """Rolls back any events in the queue for this session since the last flush."""
