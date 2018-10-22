@@ -1,9 +1,9 @@
 import logging
 
+import requests
 from kwargs_only import kwargs_only
 
 from .event import Event
-
 
 logger = logging.getLogger("bc.events")
 
@@ -107,6 +107,21 @@ class EventSession(object):
         category = category or self.client.default_category
         topic = self.client.get_topic(category, entity, action)
         self._publish(topic, data)
+
+    def publish_all(self, events):
+        """Publish all events
+
+        Parameters
+        ----------
+        events : list
+            A list of events to publish
+        """
+
+        if not self.client.publish_url:
+            return
+
+        event_data = [event.request_json for event in events]
+        requests.post(self.client.publish_all_url, json=event_data)
 
     def __getattr__(self, attr_name):
         """Magic handler to allow shortcuts to the `publish` method
