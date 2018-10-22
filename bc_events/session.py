@@ -55,9 +55,8 @@ class EventSession(object):
         will not send events and don't have to worry about rolling them back.
         """
 
-        # TODO use a bulk api endpoint once it exists
-        for event in self.events:
-            event.publish()
+        event_data = [event.request_json for event in self.events]
+        self.publish_all(event_data)
 
     def rollback(self):
         """Rolls back any events in the queue for this session since the last flush."""
