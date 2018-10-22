@@ -9,16 +9,16 @@ def event(user_session, created_test_payload):
     return user_session.events[0]
 
 
-def test_publish(event, job_id, requests_mock):
+def test_publish(event, job_id, event_requests_mock):
 
     event.publish()
 
     if event.session.client.api_url:
-        requests_mock.post.assert_called_once_with(
+        event_requests_mock.post.assert_called_once_with(
             event.session.client.publish_url, json=event.request_json, headers={"x-britecore-job-id": job_id}
         )
     else:
-        requests_mock.post.assert_not_called()
+        event_requests_mock.post.assert_not_called()
 
 
 def test_data_validation_failure(event):
