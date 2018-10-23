@@ -133,6 +133,7 @@ class EventSession(object):
         # Publish up to MAX_BULK_EVENTS events at a time
         for i in range(0, len(all_event_data), MAX_BULK_EVENTS):
             event_data = all_event_data[i:i+MAX_BULK_EVENTS]
+            logger.info("Publishing {0} Events".format(len(event_data)), extra={"context": event_data})
             requests.post(self.client.publish_all_url, json=event_data)
 
     def __getattr__(self, attr_name):
