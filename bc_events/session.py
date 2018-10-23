@@ -6,6 +6,8 @@ from kwargs_only import kwargs_only
 from .event import Event
 
 logger = logging.getLogger("bc.events")
+MAX_BULK_EVENTS = 250
+BULK_EVENT_SINGLE_POST_THRESHOLD = 5
 
 
 class EventSession(object):
@@ -117,11 +119,21 @@ class EventSession(object):
             A list of events to publish
         """
 
+        # If there are less than BULK_EVENT_SINGLE_POST_THRESHOLD events in the queue, publish individually
+        if len(self.events) <= BULK_EVENT_SINGLE_POST_THRESHOLD:
+            for event in self.events:
+                event.publish()
+            return
+
         if not self.client.publish_url:
             return
 
-        event_data = [event.request_json for event in events]
-        requests.post(self.client.publish_all_url, json=event_data)
+        all_event_data = [event.request_json for event in events]
+
+        # Publish up to MAX_BULK_EVENTS events at a time
+        for i in range(0, len(all_event_data), MAX_BULK_EVENTS):
+            event_data = all_event_data[i:i+MAX_BULK_EVENTS]
+            requests.post(self.client.publish_all_url, json=event_data)
 
     def __getattr__(self, attr_name):
         """Magic handler to allow shortcuts to the `publish` method
