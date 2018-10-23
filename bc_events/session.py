@@ -7,7 +7,7 @@ from .event import Event
 
 logger = logging.getLogger("bc.events")
 MAX_BULK_EVENTS = 250
-BULK_EVENT_SINGLE_POST_THRESHOLD = 5
+BULK_EVENT_SINGLE_PUBLISH_THRESHOLD = 5
 
 
 class EventSession(object):
@@ -58,7 +58,7 @@ class EventSession(object):
         """
 
         # If there are less than BULK_EVENT_SINGLE_POST_THRESHOLD events in the queue, publish individually
-        if len(self.events) <= BULK_EVENT_SINGLE_POST_THRESHOLD:
+        if len(self.events) <= BULK_EVENT_SINGLE_PUBLISH_THRESHOLD:
             for event in self.events:
                 event.publish()
         else:
