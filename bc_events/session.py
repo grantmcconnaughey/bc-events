@@ -57,7 +57,12 @@ class EventSession(object):
         will not send events and don't have to worry about rolling them back.
         """
 
-        self.publish_bulk(self.events)
+        # If there are less than BULK_EVENT_SINGLE_POST_THRESHOLD events in the queue, publish individually
+        if len(self.events) <= BULK_EVENT_SINGLE_POST_THRESHOLD:
+            for event in self.events:
+                event.publish()
+        else:
+            self.publish_bulk(self.events)
 
     def rollback(self):
         """Rolls back any events in the queue for this session since the last flush."""
@@ -118,12 +123,6 @@ class EventSession(object):
         events : list
             A list of events to publish
         """
-
-        # If there are less than BULK_EVENT_SINGLE_POST_THRESHOLD events in the queue, publish individually
-        if len(self.events) <= BULK_EVENT_SINGLE_POST_THRESHOLD:
-            for event in self.events:
-                event.publish()
-            return
 
         if not self.client.publish_url:
             return
