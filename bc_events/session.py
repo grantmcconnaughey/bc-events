@@ -57,7 +57,7 @@ class EventSession(object):
         will not send events and don't have to worry about rolling them back.
         """
 
-        self.publish_all(self.events)
+        self.publish_bulk(self.events)
 
     def rollback(self):
         """Rolls back any events in the queue for this session since the last flush."""
@@ -110,7 +110,7 @@ class EventSession(object):
         topic = self.client.get_topic(category, entity, action)
         self._publish(topic, data)
 
-    def publish_all(self, events):
+    def publish_bulk(self, events):
         """Publish all events
 
         Parameters
