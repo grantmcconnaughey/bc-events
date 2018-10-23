@@ -21,14 +21,14 @@ def test_publish_delayed(user_session, created_test_payload):
     assert event.data == created_test_payload
 
 
-def test_publish_immediately(immediate_session, created_test_payload, requests_mock):
+def test_publish_immediately(immediate_session, created_test_payload, event_requests_mock):
 
     immediate_session.publish(action="Created", entity="Test", data=created_test_payload)
 
     assert len(immediate_session.events) == 0
 
     if immediate_session.client.api_url:
-        requests_mock.post.assert_called_once()
+        event_requests_mock.post.assert_called_once()
 
 
 def test_publish_no_kwargs(user_session, created_test_payload):
@@ -63,7 +63,7 @@ def test_magic_call_incorrect(user_session, created_test_payload):
         user_session.tested_create(created_test_payload)
 
 
-def test_flush(user_session):
+def test_flush_few_events(user_session):
 
     fake_event = Mock()
     another_fake_event = Mock()
@@ -74,6 +74,22 @@ def test_flush(user_session):
 
     fake_event.publish.assert_called_once()
     another_fake_event.publish.assert_called_once()
+
+
+def test_flush_max_events(user_session, session_requests_mock):
+    user_session.events = [Mock()] * 250
+
+    user_session.flush()
+
+    assert session_requests_mock.post.call_count == 1 or user_session.client.publish_bulk_url is None
+
+
+def test_flush_more_than_max_events(user_session, session_requests_mock):
+    user_session.events = [Mock()] * (250 * 2 + 100)
+
+    user_session.flush()
+
+    assert session_requests_mock.post.call_count == 3 or user_session.client.publish_bulk_url is None
 
 
 def test_rollback(user_session):

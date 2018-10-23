@@ -27,6 +27,7 @@ class EventClient(object):
 
         self.api_url = api_url
         self.publish_url = api_url + "/events" if api_url else None
+        self.publish_bulk_url = self.publish_url + "/bulk/" if api_url else None
 
         self.service_name = service_name
 

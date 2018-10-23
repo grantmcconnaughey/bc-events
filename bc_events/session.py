@@ -1,11 +1,13 @@
 import logging
 
+import requests
 from kwargs_only import kwargs_only
 
 from .event import Event
 
-
 logger = logging.getLogger("bc.events")
+MAX_BULK_EVENTS = 250
+BULK_EVENT_SINGLE_PUBLISH_THRESHOLD = 5
 
 
 class EventSession(object):
@@ -55,9 +57,12 @@ class EventSession(object):
         will not send events and don't have to worry about rolling them back.
         """
 
-        # TODO use a bulk api endpoint once it exists
-        for event in self.events:
-            event.publish()
+        # If there are less than BULK_EVENT_SINGLE_POST_THRESHOLD events in the queue, publish individually
+        if len(self.events) <= BULK_EVENT_SINGLE_PUBLISH_THRESHOLD:
+            for event in self.events:
+                event.publish()
+        else:
+            self.publish_bulk(self.events)
 
     def rollback(self):
         """Rolls back any events in the queue for this session since the last flush."""
@@ -109,6 +114,25 @@ class EventSession(object):
         category = category or self.client.default_category
         topic = self.client.get_topic(category, entity, action)
         self._publish(topic, data)
+
+    def publish_bulk(self, events):
+        """Publish all events
+
+        Parameters
+        ----------
+        events : list
+            A list of events to publish
+        """
+
+        all_event_data = [event.request_json for event in events]
+
+        # Publish up to MAX_BULK_EVENTS events at a time
+        for i in range(0, len(all_event_data), MAX_BULK_EVENTS):
+            event_data = all_event_data[i : i + MAX_BULK_EVENTS]
+            logger.info("Publishing {0} Events".format(len(event_data)), extra={"context": event_data})
+
+            if self.client.publish_bulk_url:
+                requests.post(self.client.publish_bulk_url, json=event_data)
 
     def __getattr__(self, attr_name):
         """Magic handler to allow shortcuts to the `publish` method
