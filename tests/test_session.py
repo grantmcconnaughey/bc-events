@@ -63,7 +63,7 @@ def test_magic_call_incorrect(user_session, created_test_payload):
         user_session.tested_create(created_test_payload)
 
 
-def test_flush(user_session, session_requests_mock):
+def test_flush_few_events(user_session):
 
     fake_event = Mock()
     another_fake_event = Mock()
@@ -72,7 +72,24 @@ def test_flush(user_session, session_requests_mock):
 
     user_session.flush()
 
+    fake_event.publish.assert_called_once()
+    another_fake_event.publish.assert_called_once()
+
+
+def test_flush_max_events(user_session, session_requests_mock):
+    user_session.events = [Mock()] * 250
+
+    user_session.flush()
+
     assert session_requests_mock.post.call_count == 1 or user_session.client.publish_url is None
+
+
+def test_flush_more_than_max_events(user_session, session_requests_mock):
+    user_session.events = [Mock()] * 250 * 2
+
+    user_session.flush()
+
+    assert session_requests_mock.post.call_count == 2 or user_session.client.publish_url is None
 
 
 def test_rollback(user_session):
