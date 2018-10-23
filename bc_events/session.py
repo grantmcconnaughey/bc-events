@@ -131,8 +131,8 @@ class EventSession(object):
             event_data = all_event_data[i : i + MAX_BULK_EVENTS]
             logger.info("Publishing {0} Events".format(len(event_data)), extra={"context": event_data})
 
-            if self.client.publish_all_url:
-                requests.post(self.client.publish_all_url, json=event_data)
+            if self.client.publish_bulk_url:
+                requests.post(self.client.publish_bulk_url, json=event_data)
 
     def __getattr__(self, attr_name):
         """Magic handler to allow shortcuts to the `publish` method
