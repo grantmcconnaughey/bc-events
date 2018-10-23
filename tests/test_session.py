@@ -85,11 +85,11 @@ def test_flush_max_events(user_session, session_requests_mock):
 
 
 def test_flush_more_than_max_events(user_session, session_requests_mock):
-    user_session.events = [Mock()] * 250 * 2
+    user_session.events = [Mock()] * (250 * 2 + 100)
 
     user_session.flush()
 
-    assert session_requests_mock.post.call_count == 2 or user_session.client.publish_url is None
+    assert session_requests_mock.post.call_count == 3 or user_session.client.publish_url is None
 
 
 def test_rollback(user_session):
