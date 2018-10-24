@@ -1,9 +1,11 @@
 import logging
 
+import requests
 from kwargs_only import kwargs_only
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 from .event import Event
-from .utils import get_requests_session
 
 logger = logging.getLogger("bc.events")
 MAX_BULK_EVENTS = 250
@@ -38,7 +40,6 @@ class EventSession(object):
 
         self.publish_immediately = publish_immediately
         self.events = []
-        self.requests_session = get_requests_session()
 
     def __repr__(self):
         return "EventSession(actor_id=%r, actor_type=%r, job_id=%r, client=%r, publish_immediately=%r)" % (
@@ -48,6 +49,23 @@ class EventSession(object):
             self.client,
             self.publish_immediately,
         )
+
+    @property
+    def requests_session(self):
+        """For use on AWS APIs that periodically fail with 500 and suggest retrying"""
+        session = requests.Session()
+        retry = Retry(
+            total=3, read=3, connect=3, status_forcelist=[500],
+            backoff_factor=0.3, method_whitelist=False
+        )
+        adapter = HTTPAdapter(
+            max_retries=retry,
+            pool_maxsize=20,
+            pool_connections=20
+        )
+        session.mount("https://", adapter)
+        session.mount("http://", adapter)
+        return session
 
     def flush(self):
         """Flushes events from the queue to the API
