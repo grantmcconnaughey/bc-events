@@ -77,7 +77,8 @@ def test_flush_few_events(user_session):
 
 
 def test_flush_max_events(user_session, session_requests_mock):
-    user_session.events = [Mock()] * 250
+    mock = Mock()
+    user_session.events = [mock] * 250
 
     user_session.flush()
 
