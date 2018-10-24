@@ -1,9 +1,9 @@
 import logging
 
-import requests
 from kwargs_only import kwargs_only
 
 from .event import Event
+from .utils import get_requests_session
 
 logger = logging.getLogger("bc.events")
 MAX_BULK_EVENTS = 250
@@ -38,6 +38,7 @@ class EventSession(object):
 
         self.publish_immediately = publish_immediately
         self.events = []
+        self.requests_session = get_requests_session()
 
     def __repr__(self):
         return "EventSession(actor_id=%r, actor_type=%r, job_id=%r, client=%r, publish_immediately=%r)" % (
@@ -132,7 +133,7 @@ class EventSession(object):
             logger.info("Publishing {0} Events".format(len(event_data)), extra={"context": event_data})
 
             if self.client.publish_bulk_url:
-                requests.post(self.client.publish_bulk_url, json=event_data)
+                self.requests_session.post(self.client.publish_bulk_url, json=event_data)
 
     def __getattr__(self, attr_name):
         """Magic handler to allow shortcuts to the `publish` method
