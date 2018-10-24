@@ -75,5 +75,3 @@ def requests_session_mock(monkeypatch):
     mock.post = Mock()
     monkeypatch.setattr(requests, "Session", mock)
     return mock()
-
-
