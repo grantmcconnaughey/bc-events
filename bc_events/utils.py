@@ -27,16 +27,10 @@ def build_topic_name(category, entity, action):
 
 def requests_session():
     """For use on AWS APIs that periodically fail with 500 and suggest retrying"""
+
     session = requests.Session()
-    retry = Retry(
-        total=3, read=3, connect=3, status_forcelist=[500],
-        backoff_factor=0.3, method_whitelist=False
-    )
-    adapter = HTTPAdapter(
-        max_retries=retry,
-        pool_maxsize=20,
-        pool_connections=20
-    )
+    retry = Retry(total=3, read=3, connect=3, status_forcelist=[500], backoff_factor=0.3, method_whitelist=False)
+    adapter = HTTPAdapter(max_retries=retry, pool_maxsize=20, pool_connections=20)
     session.mount("https://", adapter)
     session.mount("http://", adapter)
     return session
