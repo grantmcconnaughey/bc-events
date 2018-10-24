@@ -1,6 +1,5 @@
 import pytest
 from jsonschema import ValidationError
-import time
 
 
 @pytest.fixture
