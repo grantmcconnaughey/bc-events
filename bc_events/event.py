@@ -1,9 +1,11 @@
 import logging
 
 import jsonschema
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 from .constants import EVENT_SCHEMA
-from .utils import get_requests_session
 
 logger = logging.getLogger("bc.events")
 
@@ -24,7 +26,23 @@ class Event(object):
         self.topic = topic
         self.data = data
         self.session = session
-        self.requests_session = get_requests_session()
+
+    @property
+    def requests_session(self):
+        """For use on AWS APIs that periodically fail with 500 and suggest retrying"""
+        session = requests.Session()
+        retry = Retry(
+            total=3, read=3, connect=3, status_forcelist=[500],
+            backoff_factor=0.3, method_whitelist=False
+        )
+        adapter = HTTPAdapter(
+            max_retries=retry,
+            pool_maxsize=20,
+            pool_connections=20
+        )
+        session.mount("https://", adapter)
+        session.mount("http://", adapter)
+        return session
 
     @property
     def request_json(self):
