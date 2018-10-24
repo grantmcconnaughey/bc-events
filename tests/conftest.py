@@ -1,6 +1,7 @@
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 import pytest
+import requests
 import yaml
 
 from bc_events import EventClient
@@ -18,7 +19,7 @@ def service_name():
 
 @pytest.fixture(params=[0, 1, 2])
 def topic_definitions(request):
-    topic_definitions_path = "tests/test_events.yaml"
+    topic_definitions_path = "../tests/test_events.yaml"
 
     if request.param == 0:
         return topic_definitions_path
@@ -69,22 +70,10 @@ def created_test_payload():
 
 
 @pytest.fixture
-def session_requests_mock(request):
-    req_mock = Mock()
-    req_patch = patch("bc_events.session.EventSession.requests_session", req_mock)
-    req_patch.start()
-
-    request.addfinalizer(req_patch.stop)
-
-    return req_mock
+def requests_session_mock(monkeypatch):
+    mock = Mock()
+    mock.post = Mock()
+    monkeypatch.setattr(requests, "Session", mock)
+    return mock()
 
 
-@pytest.fixture
-def event_requests_mock(request):
-    req_mock = Mock()
-    req_patch = patch("bc_events.event.Event.requests_session", req_mock)
-    req_patch.start()
-
-    request.addfinalizer(req_patch.stop)
-
-    return req_mock
