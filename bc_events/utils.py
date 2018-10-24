@@ -30,7 +30,7 @@ def requests_session():
 
     session = requests.Session()
     retry = Retry(total=3, read=3, connect=3, status_forcelist=[500], backoff_factor=0.3, method_whitelist=False)
-    adapter = HTTPAdapter(max_retries=retry, pool_maxsize=20, pool_connections=20)
+    adapter = HTTPAdapter(max_retries=retry)
     session.mount("https://", adapter)
     session.mount("http://", adapter)
     return session
