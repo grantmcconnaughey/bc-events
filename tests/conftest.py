@@ -19,7 +19,7 @@ def service_name():
 
 @pytest.fixture(params=[0, 1, 2])
 def topic_definitions(request):
-    topic_definitions_path = "../tests/test_events.yaml"
+    topic_definitions_path = "tests/test_events.yaml"
 
     if request.param == 0:
         return topic_definitions_path
