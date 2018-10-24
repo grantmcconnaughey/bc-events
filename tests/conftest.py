@@ -69,9 +69,9 @@ def created_test_payload():
 
 
 @pytest.fixture
-def event_requests_mock(request):
+def session_requests_mock(request):
     req_mock = Mock()
-    req_patch = patch("bc_events.event.requests", req_mock)
+    req_patch = patch("bc_events.session.EventSession.requests_session", req_mock)
     req_patch.start()
 
     request.addfinalizer(req_patch.stop)
@@ -80,9 +80,9 @@ def event_requests_mock(request):
 
 
 @pytest.fixture
-def session_requests_mock(request):
+def event_requests_mock(request):
     req_mock = Mock()
-    req_patch = patch("bc_events.session.requests", req_mock)
+    req_patch = patch("bc_events.event.Event.requests_session", req_mock)
     req_patch.start()
 
     request.addfinalizer(req_patch.stop)
