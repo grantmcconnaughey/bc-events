@@ -29,7 +29,7 @@ def build_topic_name(category, entity, action):
 
 
 class EventsApiRetryingWrapper(object):
-    def __init__(self, url, payload, headers={}, delay=0.45, max_delay=5, max_time=35):
+    def __init__(self, url, payload, headers={}, delay=0.1, max_delay=0.5, max_time=2):
         self.url = url
         self.payload = payload
         self.headers = headers
