@@ -80,6 +80,7 @@ def events_api_wrapper_invoke_mock(monkeypatch):
 @pytest.fixture
 def post_mock(monkeypatch):
     from collections import namedtuple
+
     post_mock = Mock()
     post_mock.return_value = namedtuple("Struct", ["json", "status_code"])(lambda: {}, 201)
     monkeypatch.setattr(requests, "post", post_mock)
