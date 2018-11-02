@@ -46,9 +46,7 @@ def events_api_wrapper(request):
     return EventsApiRetryingWrapper(params[0], params[1], params[2], delay=0.01, max_delay=0.1, max_time=1)
 
 
-def test_post(events_api_wrapper, monkeypatch):
-    post_mock = Mock()
-    monkeypatch.setattr(requests, "post", post_mock)
+def test_post(events_api_wrapper, post_mock):
     events_api_wrapper.post()
     assert post_mock.call_count in [1, 4]
 
