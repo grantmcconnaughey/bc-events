@@ -24,10 +24,8 @@ class MultiResponse:
         self.status_code = None
 
     def __getattribute__(self, key):
-        if key == "responses":
-            return super().__getattribute__("responses")
-        elif key == "status_code":
-            return super().__getattribute__("status_code")
+        if key in ["responses", "status_code"]:
+            return super().__getattribute__(key)
         elif key == "json":
             response, status_code = self.responses.pop(0)
             self.status_code = status_code
