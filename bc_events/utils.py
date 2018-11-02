@@ -76,9 +76,9 @@ class EventsApiRetryingWrapper(object):
 
     def invoke(self):
         retryer = Retrying(
-            retry=retry_if_exception_type(requests.exceptions.Timeout) |
-                  retry_if_exception_type(requests.exceptions.ConnectionError) |
-                  retry_if_result(self.retry_if_we_need_to),
+            retry=retry_if_exception_type(requests.exceptions.Timeout)
+            | retry_if_exception_type(requests.exceptions.ConnectionError)
+            | retry_if_result(self.retry_if_we_need_to),
             stop=stop_after_delay(self.max_time),
             wait=wait_exponential(multiplier=self.delay, max=self.max_delay),
         )
