@@ -32,6 +32,10 @@ class MultiResponse:
             return lambda: response
 
 
+def create_sample_response(response, status_code):
+    return namedtuple("Struct", ["json", "status_code"])(lambda: response, status_code)
+
+
 @pytest.fixture(
     params=[
         ("https://some_url.com/events/", single_event, {"x-britecore-job-id", "1234567"}),
@@ -74,9 +78,7 @@ def test_extract_failed_record(events_api_wrapper):
 
 
 def test_retry_if_we_need_to_on_400_provisioned_throughput_exceeded(events_api_wrapper):
-    sample_response = namedtuple("Struct", ["json", "status_code"])(
-        lambda: {"errorType": "ProvisionedThroughputExceededException"}, 400
-    )
+    sample_response = create_sample_response({"errorType": "ProvisionedThroughputExceededException"}, 400)
     response = events_api_wrapper.retry_if_we_need_to(sample_response)
 
     # We need to retry this
@@ -84,9 +86,7 @@ def test_retry_if_we_need_to_on_400_provisioned_throughput_exceeded(events_api_w
 
 
 def test_retry_if_we_need_to_on_500_internal_failure(events_api_wrapper):
-    sample_response = namedtuple("Struct", ["json", "status_code"])(
-        lambda: {"errorType": "InternalFailureException"}, 500
-    )
+    sample_response = create_sample_response({"errorType": "InternalFailureException"}, 500)
     response = events_api_wrapper.retry_if_we_need_to(sample_response)
 
     # We need to retry this
@@ -94,9 +94,7 @@ def test_retry_if_we_need_to_on_500_internal_failure(events_api_wrapper):
 
 
 def test_retry_if_we_need_to_on_400_unsupported_failure(events_api_wrapper):
-    sample_response = namedtuple("Struct", ["json", "status_code"])(
-        lambda: {"errorType": "SomethingWeCantRetryException"}, 400
-    )
+    sample_response = create_sample_response({"errorType": "SomethingWeCantRetryException"}, 400)
     response = events_api_wrapper.retry_if_we_need_to(sample_response)
 
     # We can't retry this
@@ -104,9 +102,7 @@ def test_retry_if_we_need_to_on_400_unsupported_failure(events_api_wrapper):
 
 
 def test_retry_if_we_need_to_on_all_events_succeeded(events_api_wrapper):
-    sample_response = namedtuple("Struct", ["json", "status_code"])(
-        lambda: {"failedRecords": 0}, 201
-    )
+    sample_response = create_sample_response({"failedRecords": 0}, 201)
     response = events_api_wrapper.retry_if_we_need_to(sample_response)
 
     # We don't need to retry this
@@ -114,15 +110,13 @@ def test_retry_if_we_need_to_on_all_events_succeeded(events_api_wrapper):
 
 
 def test_retry_if_we_need_to_on_partial_failure(events_api_wrapper):
-    sample_response = namedtuple("Struct", ["json", "status_code"])(
-        lambda: {"failedRecords": 1, "records": [
+    sample_response = create_sample_response({"failedRecords": 1, "records": [
             single_event,
             single_event,
             single_event,
             single_event,
             single_event,
-        ]}, 201
-    )
+        ]}, 201)
     response = events_api_wrapper.retry_if_we_need_to(sample_response)
 
     # We'll retry anything that needs to be retried
@@ -131,9 +125,7 @@ def test_retry_if_we_need_to_on_partial_failure(events_api_wrapper):
 
 def test_invoke_successful_call(events_api_wrapper, monkeypatch):
     requests_mock = Mock()
-    requests_mock.return_value = namedtuple("Struct", ["json", "status_code"])(
-        lambda: {"failedRecords": 0, "records": [single_event]}, 201
-    )
+    requests_mock.return_value = create_sample_response({"failedRecords": 0, "records": [single_event]}, 201)
     monkeypatch.setattr(requests, "post", requests_mock)
     events_api_wrapper.invoke()
     assert requests_mock.call_count == 1
