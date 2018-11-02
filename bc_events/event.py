@@ -3,7 +3,7 @@ import logging
 import jsonschema
 
 from .constants import EVENT_SCHEMA
-from .utils import requests_session
+from .utils import EventsApiRetryingWrapper
 
 logger = logging.getLogger("bc.events")
 
@@ -76,5 +76,5 @@ class Event(object):
         # TODO this is going to need authentication when BriteAuth is hooked up to the API
         if self.session.client.publish_url:
             headers = {"x-britecore-job-id": self.session.job_id}
-            session = requests_session()
-            session.post(self.session.client.publish_url, json=request_json, headers=headers)
+            events_api = EventsApiRetryingWrapper(self.session.client.publish_url, request_json, headers=headers)
+            events_api.invoke()

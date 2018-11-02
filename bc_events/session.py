@@ -3,7 +3,7 @@ import logging
 from kwargs_only import kwargs_only
 
 from .event import Event
-from .utils import requests_session
+from .utils import EventsApiRetryingWrapper
 
 logger = logging.getLogger("bc.events")
 MAX_BULK_EVENTS = 250
@@ -132,8 +132,8 @@ class EventSession(object):
             logger.info("Publishing {0} Events".format(len(event_data)), extra={"context": event_data})
 
             if self.client.publish_bulk_url:
-                session = requests_session()
-                session.post(self.client.publish_bulk_url, json=event_data)
+                bulk_api = EventsApiRetryingWrapper(self.client.publish_bulk_url, event_data)
+                bulk_api.invoke()
 
     def __getattr__(self, attr_name):
         """Magic handler to allow shortcuts to the `publish` method

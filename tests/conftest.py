@@ -5,6 +5,7 @@ import requests
 import yaml
 
 from bc_events import EventClient
+from bc_events.utils import EventsApiRetryingWrapper
 
 
 @pytest.fixture(params=["https://fake-site.britecore.com", None])
@@ -70,8 +71,17 @@ def created_test_payload():
 
 
 @pytest.fixture
-def requests_session_mock(monkeypatch):
+def events_api_wrapper_invoke_mock(monkeypatch):
     mock = Mock()
-    mock.post = Mock()
-    monkeypatch.setattr(requests, "Session", mock)
-    return mock()
+    monkeypatch.setattr(EventsApiRetryingWrapper, "invoke", mock)
+    return mock
+
+
+@pytest.fixture
+def post_mock(monkeypatch):
+    from collections import namedtuple
+
+    post_mock = Mock()
+    post_mock.return_value = namedtuple("Struct", ["json", "status_code"])(lambda: {}, 201)
+    monkeypatch.setattr(requests, "post", post_mock)
+    return post_mock
