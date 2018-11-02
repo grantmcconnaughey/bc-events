@@ -18,7 +18,6 @@ bulk_events = [single_event] * 4
 
 
 class MultiResponse:
-
     def __init__(self, responses):
         self.responses = responses
         self.status_code = None
@@ -110,13 +109,9 @@ def test_retry_if_we_need_to_on_all_events_succeeded(events_api_wrapper):
 
 
 def test_retry_if_we_need_to_on_partial_failure(events_api_wrapper):
-    sample_response = create_sample_response({"failedRecords": 1, "records": [
-            single_event,
-            single_event,
-            single_event,
-            single_event,
-            single_event,
-        ]}, 201)
+    sample_response = create_sample_response(
+        {"failedRecords": 1, "records": [single_event, single_event, single_event, single_event, single_event]}, 201
+    )
     response = events_api_wrapper.retry_if_we_need_to(sample_response)
 
     # We'll retry anything that needs to be retried
@@ -133,7 +128,13 @@ def test_invoke_successful_call(events_api_wrapper, monkeypatch):
 
 def test_invoke_with_bulk_retries(events_api_wrapper, monkeypatch):
     responses = [
-        ({"failedRecords": 2, "records": ["Success", "ProvisionedThroughputExceededException", "InternalFailureException"]}, 201),
+        (
+            {
+                "failedRecords": 2,
+                "records": ["Success", "ProvisionedThroughputExceededException", "InternalFailureException"],
+            },
+            201,
+        ),
         ({"failedRecords": 2, "records": ["ProvisionedThroughputExceededException", "InternalFailureException"]}, 201),
         ({"failedRecords": 2, "records": ["ProvisionedThroughputExceededException", "InternalFailureException"]}, 201),
         ({"failedRecords": 0, "records": ["Success", "Success"]}, 201),
@@ -147,9 +148,7 @@ def test_invoke_with_bulk_retries(events_api_wrapper, monkeypatch):
 
 
 def test_invoke_without_bulk_retries(events_api_wrapper, monkeypatch):
-    responses = [
-        ({"failedRecords": 0, "records": ["Success", "Success"]}, 201)
-    ]
+    responses = [({"failedRecords": 0, "records": ["Success", "Success"]}, 201)]
 
     requests_mock = Mock()
     requests_mock.return_value = MultiResponse(responses)
@@ -164,7 +163,7 @@ def test_invoke_with_events_retries(events_api_wrapper, monkeypatch):
         ({"errorType": "ProvisionedThroughputExceededException"}, 400),
         ({"errorType": "InternalFailureException"}, 500),
         ({"errorType": "ProvisionedThroughputExceededException"}, 400),
-        ({"eventId": "some_id", "jobId": "some_job"}, 201)
+        ({"eventId": "some_id", "jobId": "some_job"}, 201),
     ]
 
     requests_mock = Mock()
@@ -176,9 +175,7 @@ def test_invoke_with_events_retries(events_api_wrapper, monkeypatch):
 
 
 def test_invoke_without_events_retries(events_api_wrapper, monkeypatch):
-    responses = [
-        ({"eventId": "some_id", "jobId": "some_job"}, 201)
-    ]
+    responses = [({"eventId": "some_id", "jobId": "some_job"}, 201)]
 
     requests_mock = Mock()
     requests_mock.return_value = MultiResponse(responses)
