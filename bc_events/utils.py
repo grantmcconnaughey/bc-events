@@ -1,9 +1,7 @@
 import logging
 
 import requests
-from requests.adapters import HTTPAdapter
 from tenacity import Retrying, retry_if_exception_type, retry_if_result, stop_after_delay, wait_exponential
-from urllib3.util.retry import Retry
 
 logger = logging.getLogger("bc.events")
 
