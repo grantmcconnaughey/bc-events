@@ -5,7 +5,7 @@ import requests
 import yaml
 
 from bc_events import EventClient
-from bc_events.utils import EventsApiWrapper
+from bc_events.utils import EventsApiRetryingWrapper
 
 
 @pytest.fixture(params=["https://fake-site.britecore.com", None])
@@ -73,7 +73,7 @@ def created_test_payload():
 @pytest.fixture
 def events_api_wrapper_invoke_mock(monkeypatch):
     mock = Mock()
-    monkeypatch.setattr(EventsApiWrapper, "invoke", mock)
+    monkeypatch.setattr(EventsApiRetryingWrapper, "invoke", mock)
     return mock
 
 

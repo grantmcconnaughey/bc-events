@@ -30,7 +30,7 @@ def build_topic_name(category, entity, action):
     return "{category}.{entity}{action}".format(category=category, entity=entity, action=action)
 
 
-class EventsApiWrapper(object):
+class EventsApiRetryingWrapper(object):
     def __init__(self, url, payload, headers={}, delay=0.45, max_delay=5, max_time=35):
         self.url = url
         self.payload = payload

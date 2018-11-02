@@ -3,7 +3,7 @@ import logging
 from kwargs_only import kwargs_only
 
 from .event import Event
-from .utils import EventsApiWrapper
+from .utils import EventsApiRetryingWrapper
 
 logger = logging.getLogger("bc.events")
 MAX_BULK_EVENTS = 250
@@ -132,7 +132,7 @@ class EventSession(object):
             logger.info("Publishing {0} Events".format(len(event_data)), extra={"context": event_data})
 
             if self.client.publish_bulk_url:
-                bulk_api = EventsApiWrapper(self.client.publish_bulk_url, event_data)
+                bulk_api = EventsApiRetryingWrapper(self.client.publish_bulk_url, event_data)
                 bulk_api.invoke()
 
     def __getattr__(self, attr_name):
