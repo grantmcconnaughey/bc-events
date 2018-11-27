@@ -19,6 +19,10 @@ def test_publish(event, job_id, post_mock):
         post_mock.assert_not_called()
 
 
+def test_str(event):
+    assert str(event) == "testing.TestCreated"
+
+
 def test_data_validation_failure(event):
 
     event.data = {"bad": "payload"}

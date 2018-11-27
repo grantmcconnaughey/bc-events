@@ -44,7 +44,7 @@ class Event(object):
         }
 
     def __str__(self):
-        return self.topic_name
+        return str(self.topic)
 
     def __repr__(self):
         return "Event(topic=%r, data=%r, session=%r)" % (self.topic, self.data, self.session)
@@ -71,7 +71,7 @@ class Event(object):
         self.validate()
 
         request_json = self.request_json
-        logger.info("Publishing Event", extra={"context": request_json})
+        logger.info("Publishing event {}".format(self), extra={"context": request_json})
 
         # TODO this is going to need authentication when BriteAuth is hooked up to the API
         if self.session.client.publish_url:
